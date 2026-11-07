@@ -104,6 +104,9 @@ main{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:30px 22px
 @keyframes launch{0%{transform:translate(-50%,0)}12%{transform:translate(calc(-50% - 3px),-50px)}18%{transform:translate(calc(-50% + 3px),-90px)}100%{transform:translate(-50%,-135vh)}}
 .flame{transform-box:fill-box;transform-origin:50% 0;animation:fl .12s infinite alternate}
 @keyframes fl{to{transform:scaleY(1.35)}}
+.nm{width:100%;padding:15px 16px;border-radius:16px;border:2px solid #fff;background:#ffffffcc;font:inherit;font-size:1.05rem;color:var(--ink)}
+.nm::placeholder{color:#8d6bd6aa}
+#msg a{color:#c23a8a;font-weight:700}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}.rocket{display:none}}
 </style>
 </head>
@@ -186,7 +189,8 @@ main{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:30px 22px
   </section>
 
   <section class="cta">
-    <button class="btn yes" id="yes">¡Misión confirmada!</button>
+    <input class="nm" id="guest" type="text" maxlength="40" placeholder="Escribe tu nombre" aria-label="Tu nombre" autocomplete="name">
+    <button class="btn yes" id="yes">Sí asistiré (confirmar por WhatsApp)</button>
     <button class="btn no" id="no">No podré ir</button>
     <button class="btn share" id="share">Compartir la invitación</button>
   </section>
@@ -301,11 +305,23 @@ tick(); setInterval(tick,1000);
 
 function launch(){const r=$('rocket');r.classList.remove('go');void r.offsetWidth;r.classList.add('go');}
 function toast(t){const el=$('toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2600)}
+const WA = "51963219099";
+function waLink(texto){
+  const nombre = $('guest').value.trim();
+  const msg = (nombre ? `Hola, soy ${nombre}. ` : 'Hola. ') + texto;
+  return `https://wa.me/${WA}?text=${encodeURIComponent(msg)}`;
+}
+function openWA(u,ms){
+  $('msg').innerHTML = `Abriendo WhatsApp… <a href="${u}">Toca aquí si no se abre</a>`;
+  setTimeout(()=>{location.href = u},ms);
+}
 $('yes').onclick = e=>{
   burst(e.clientX,e.clientY,80,1.4); rain(); launch();
-  $('msg').textContent = `¡Misión confirmada! ${PARTY.name} te espera`;
+  openWA(waLink(`Confirmo mi asistencia al primer añito de ${PARTY.name}. ¡Ahí estaré!`),1500);
 };
-$('no').onclick = ()=>{ $('msg').textContent = 'Te vamos a extrañar. ¡Gracias por avisar!' };
+$('no').onclick = ()=>{
+  openWA(waLink(`Lamentablemente no podré asistir al primer añito de ${PARTY.name}. ¡Gracias por la invitación!`),600);
+};
 $('share').onclick = async ()=>{
   const data = {title:document.title,text:`Estás invitado al primer añito de ${PARTY.name}`,url:location.href};
   try{ if(navigator.share){await navigator.share(data);return} }catch(e){return}
