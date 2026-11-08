@@ -107,6 +107,11 @@ main{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:30px 22px
 .nm{width:100%;padding:15px 16px;border-radius:16px;border:2px solid #fff;background:#ffffffcc;font:inherit;font-size:1.05rem;color:var(--ink)}
 .nm::placeholder{color:#8d6bd6aa}
 #msg a{color:#c23a8a;font-weight:700}
+#mus{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));right:12px;z-index:45;width:44px;height:44px;border-radius:50%;background:#ffffffdd;color:var(--ink);display:none;place-items:center;padding:0;box-shadow:0 3px 0 #d9ccffcc}
+#mus.show{display:grid}
+#mus svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+#mus .x{display:none}
+#mus.off .x{display:block}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}.rocket{display:none}}
 </style>
 </head>
@@ -205,6 +210,7 @@ main{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:30px 22px
   <rect x="20" y="78" width="20" height="8" rx="3" fill="#d9ccff"/>
 </svg>
 <div class="toast" id="toast"></div>
+<button id="mus" aria-label="Silenciar música"><svg viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/><path class="x" d="M3 3l18 18"/></svg></button>
 
 <script>
 // Edita aquí los datos de la fiesta
@@ -271,10 +277,44 @@ function rain(){for(let i=0;i<8;i++)setTimeout(()=>burst(Math.random()*innerWidt
 function shower(ms){const t=setInterval(()=>{for(let i=0;i<2;i++){const p=mk(Math.random()*innerWidth,-20,(Math.random()-.5)*2,1+Math.random()*2.5,200);p.r=10+Math.random()*10;parts.push(p)}if(!raf)loop()},80);setTimeout(()=>clearInterval(t),ms)}
 function opening(){burst(innerWidth/2,innerHeight/2,130,1.7);for(let i=0;i<8;i++)setTimeout(()=>burst(Math.random()*innerWidth,Math.random()*innerHeight*.6,40,1.2),i*230);shower(3600)}
 
+// Música: "Cumpleaños feliz" alegre, sintetizada en el navegador
+const N={G4:392,A4:440,B4:493.88,C5:523.25,D5:587.33,E5:659.25,F5:698.46,G5:783.99,C6:1046.5,E6:1318.5,G6:1568,C7:2093};
+const MEL=[['G4',.75],['G4',.25],['A4',1],['G4',1],['C5',1],['B4',2],['G4',.75],['G4',.25],['A4',1],['G4',1],['D5',1],['C5',2],['G4',.75],['G4',.25],['G5',1],['E5',1],['C5',1],['B4',1],['A4',1],['F5',.75],['F5',.25],['E5',1],['C5',1],['D5',1],['C5',2]];
+const CH={C:{b:130.81,t:[261.63,329.63,392]},G:{b:98,t:[246.94,293.66,392]},F:{b:87.31,t:[261.63,349.23,440]}};
+const BARS=['C','G','G','C','C','F','F','C'];
+let ac=null,musicOn=false,musicTimer=0,master=null,pass=0;
+function tone(f,t,d,v,ty){const o=ac.createOscillator(),g=ac.createGain();o.type=ty;o.frequency.value=f;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(v,t+.01);g.gain.exponentialRampToValueAtTime(0.0001,t+d);o.connect(g);g.connect(master);o.start(t);o.stop(t+d+.05)}
+function bell(f,t,d){tone(f,t,d*1.8,.17,'sine');tone(f*2,t,d*.9,.05,'triangle');tone(f*3,t,d*.4,.025,'sine')}
+function playLoop(){
+  if(!musicOn) return;
+  const B=.38,t0=ac.currentTime+.08,up=pass%2?2:1;let t=t0;
+  MEL.forEach(([n,b])=>{bell(N[n]*up,t,b*B);t+=b*B});
+  BARS.forEach((c,i)=>{const h=CH[c],s=t0+i*3*B;tone(h.b,s,B*1.6,.22,'triangle');[1,2].forEach(k=>h.t.forEach(f=>tone(f,s+k*B,B*.9,.05,'triangle')))});
+  [N.C6,N.E6,N.G6,N.C7].forEach((f,i)=>bell(f,t+.02+i*.11,.5));
+  pass++;
+  musicTimer=setTimeout(playLoop,(t-t0+1.2)*1000);
+}
+function setMusic(on){
+  musicOn=on;$('mus').classList.toggle('off',!on);
+  $('mus').setAttribute('aria-label',on?'Silenciar música':'Activar música');
+  clearTimeout(musicTimer);
+  if(on){ac.resume();playLoop()}else if(ac){ac.suspend()}
+}
+function startMusic(){
+  try{
+    const AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC) return;
+    if(!ac){ac=new AC();master=ac.createGain();master.gain.value=.7;master.connect(ac.destination)}
+    $('mus').classList.add('show');setMusic(true);
+  }catch(e){}
+}
+$('mus').onclick=()=>{if(ac)setMusic(!musicOn)};
+document.addEventListener('visibilitychange',()=>{if(!ac||!musicOn)return;if(document.hidden){clearTimeout(musicTimer);ac.suspend()}else{ac.resume();playLoop()}});
+
 // Escotilla
 $('hatch').addEventListener('click',function(){
   if(this.classList.contains('open')) return;
-  this.classList.add('open');
+  this.classList.add('open');startMusic();
   setTimeout(()=>{$('intro').classList.add('gone');opening()},1100);
 });
 
