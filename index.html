@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Misión Daniela: ¡mi primer añito!</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#5a3d8f;--soft:#8d6bd6;--card:#fffafc;--pink:#ffc2dc;--lilac:#d9ccff;--blue:#c3e3ff;--butter:#fff0b8;--mint:#c8f3e2;--peach:#ffd9c7;
+--grad:radial-gradient(70% 40% at 20% 0%,#ffffffaa,transparent),radial-gradient(60% 40% at 90% 70%,#ffffff88,transparent),linear-gradient(170deg,#d9ccff 0%,#fbd3ea 58%,#ffe6d6 100%);
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+html{scroll-padding-top:env(safe-area-inset-top,0px);background:#fbd3ea}
+*{box-sizing:border-box}
+body{margin:0;background:var(--grad) fixed;color:var(--ink);font-family:'Nunito',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+h1,h2,.f{font-family:'Fredoka','Trebuchet MS',sans-serif}
+h1,h2{margin:0}
+button{font:inherit;cursor:pointer;border:0}
+button:focus-visible,a:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:50;width:100%;height:100%}
+svg.sp{fill:currentColor;stroke:#fff;stroke-width:2;stroke-linejoin:round;overflow:visible}
+svg.as{fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round}
+.i{width:1em;height:1em;vertical-align:-.14em;display:inline-block}
+@keyframes bob{50%{transform:translateY(-10px) rotate(2deg)}}
+@keyframes pulse{50%{opacity:.5}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes twk{0%,100%{transform:scale(.8) rotate(-6deg);opacity:.75}50%{transform:scale(1.1) rotate(6deg);opacity:1}}
+.deco{position:absolute;color:var(--c);width:var(--s);height:var(--s);left:var(--x);top:var(--y);animation:twk 3.6s ease-in-out infinite;animation-delay:var(--d);pointer-events:none}
+#edge{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* Planeta y luna */
+.planet{position:absolute;width:84px;height:84px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#fff,#ffd3e8 50%,#ffaed3);animation:bob 6s ease-in-out infinite;pointer-events:none}
+.planet::after{content:"";position:absolute;left:-30%;right:-30%;top:38%;height:24%;border:5px solid #fff0b8;border-radius:50%;transform:rotate(-18deg)}
+.sys{position:absolute;width:100px;height:100px;pointer-events:none}
+.sys .core{position:absolute;inset:30%;border-radius:50%;background:radial-gradient(circle at 30% 30%,#fff,#c8f3e2 55%,#9fe3c8)}
+.sys .orbit{position:absolute;inset:0;border:2px dashed #fff;border-radius:50%;animation:spin 9s linear infinite}
+.sys .orbit i{position:absolute;top:-9px;left:50%;margin-left:-9px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:inset -4px -3px 0 #ecdff7}
+
+/* Pantalla inicial */
+#intro{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:20px;background:var(--grad);transition:opacity .9s,visibility .9s;overflow:hidden}
+#intro.gone{opacity:0;visibility:hidden}
+#intro .planet{bottom:8%;right:8%;width:70px;height:70px}
+#intro .sys{top:9%;right:6%;width:84px;height:84px}
+#intro h2{font-size:clamp(2.4rem,12vw,3.4rem);line-height:1;text-shadow:0 3px 0 #fff;position:relative}
+#intro .sub{margin:0;font-size:1.1rem;color:var(--soft);position:relative}
+.astro{width:130px;display:block;margin:0 auto;animation:float 5s ease-in-out infinite;filter:drop-shadow(0 10px 14px #8d6bd644);position:relative}
+@keyframes float{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-14px) rotate(6deg)}}
+.hatch{position:relative;width:min(46vw,170px);aspect-ratio:1;margin-top:14px;border-radius:50%;border:10px solid #fff;background:radial-gradient(circle,#fffbe6,#ffe38f);overflow:hidden;padding:0;animation:bob 3s ease-in-out infinite,ring 2s infinite}
+@keyframes ring{0%{box-shadow:0 0 0 0 #ffffffcc}100%{box-shadow:0 0 0 28px #fff0}}
+.hatch .in{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:3.6rem}
+.door{position:absolute;top:0;bottom:0;width:50%;background:linear-gradient(180deg,#cdb8ff,#b9a0f5);transition:transform .9s .2s cubic-bezier(.6,0,.2,1);display:grid;place-items:center;font-size:2.2rem;color:#fff}
+.door.l{left:0;border-right:2px solid #fff}
+.door.r{right:0;border-left:2px solid #fff}
+.hatch.open .l{transform:translateX(-102%)}
+.hatch.open .r{transform:translateX(102%)}
+.hint{margin-top:6px;font-size:1.05rem;animation:pulse 1.8s ease-in-out infinite;position:relative}
+
+/* Página */
+main{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:30px 22px 70px}
+.hero{text-align:center;position:relative}
+.hero p{margin:0;font-size:1.1rem}
+.hero .planet{top:70px;right:-6px}
+.hero .sys{left:4px;top:70px}
+.hero h1{font-size:clamp(3.4rem,17vw,5.4rem);line-height:1;font-weight:700;text-shadow:0 4px 0 #fff}
+.hero h1 span{display:inline-block;animation:wave 3.6s ease-in-out infinite;animation-delay:calc(var(--i)*.13s)}
+@keyframes wave{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-10px) rotate(-4deg)}}
+.surname{font-family:'Fredoka',sans-serif;font-size:1.25rem;letter-spacing:.04em;color:var(--soft);margin-top:2px}
+.age{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;margin-top:18px;width:112px;height:112px;border-radius:50%;background:var(--butter);border:4px solid #fff;font-family:'Fredoka',sans-serif;font-weight:700;font-size:3.6rem;line-height:.9;transform:rotate(-8deg);box-shadow:0 6px 0 #f3d98a}
+.age small{font-size:.95rem;font-weight:600}
+.tag{margin-top:16px;font-size:1.05rem;color:var(--soft);font-weight:700}
+.sky{position:relative;height:250px;margin:14px -22px 0;overflow:hidden}
+.sky p{position:absolute;bottom:4px;width:100%;text-align:center;margin:0;font-size:.95rem}
+.st{position:absolute;bottom:-60px;left:var(--x);width:52px;height:52px;padding:0;background:none;color:var(--c);animation:rise var(--d) linear infinite;animation-delay:var(--w);transition:transform .15s;filter:drop-shadow(0 4px 4px #8d6bd633)}
+.st svg{width:100%;height:100%}
+.st:active{transform:scale(.8)}
+@keyframes rise{0%{transform:translate(0,0) rotate(0)}50%{transform:translate(-16px,-140px) rotate(180deg)}100%{transform:translate(6px,-320px) rotate(360deg)}}
+.welcome{background:#ffffffb3;border:2px solid #fff;border-radius:24px;padding:24px 22px;margin-top:18px;text-align:center}
+.welcome h2{font-size:1.5rem;margin-bottom:10px;color:#d6609a}
+.welcome p{margin:0;font-size:1.1rem;line-height:1.55}
+.welcome .sig{margin-top:12px;font-family:'Fredoka',sans-serif;color:var(--soft);font-size:1.15rem}
+.card{background:var(--card);border-radius:24px;padding:26px 22px;margin-top:18px;box-shadow:0 8px 0 #d9ccffcc}
+.card h2{font-size:1.6rem;margin-bottom:12px}
+.row{display:flex;gap:14px;padding:13px 0;border-top:2px dashed rgba(90,61,143,.2);align-items:flex-start}
+.row:first-of-type{border-top:0}
+.row b{display:block;font-size:1.1rem;font-family:'Fredoka',sans-serif;font-weight:600}
+.row small{opacity:.8}
+.ico{flex:0 0 42px;height:42px;border-radius:50%;display:grid;place-items:center;color:var(--ink)}
+.ico svg{width:22px;height:22px}
+.card a{color:#c23a8a;font-weight:700}
+.count{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px}
+.count div{background:#ffffffbb;border:2px solid #fff;border-radius:18px;padding:14px 4px;text-align:center}
+.count strong{display:block;font-family:'Fredoka',sans-serif;font-size:2.1rem;line-height:1;color:var(--soft)}
+.count span{font-size:.8rem}
+.cta{display:flex;flex-direction:column;gap:12px;margin-top:20px}
+.btn{padding:16px 18px;border-radius:18px;font-family:'Fredoka',sans-serif;font-weight:600;font-size:1.15rem;color:var(--ink);transition:transform .15s}
+.btn:active{transform:scale(.97) translateY(2px)}
+.yes{background:var(--mint);box-shadow:0 5px 0 #92d9bd}
+.no{background:#ffffff66;border:2px solid #fff}
+.share{background:var(--pink);box-shadow:0 5px 0 #eb9bbf}
+#msg{min-height:1.6em;text-align:center;margin:14px 0 0;font-size:1.1rem;font-weight:700}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,120px);background:var(--ink);color:#fff;padding:12px 20px;border-radius:14px;font-weight:700;z-index:60;transition:transform .35s}
+.toast.show{transform:translate(-50%,0)}
+.rocket{position:fixed;left:50%;bottom:-20px;width:84px;z-index:55;transform:translateX(-50%);pointer-events:none;opacity:0}
+.rocket.go{opacity:1;animation:launch 2.8s cubic-bezier(.5,0,.9,.4) forwards}
+@keyframes launch{0%{transform:translate(-50%,0)}12%{transform:translate(calc(-50% - 3px),-50px)}18%{transform:translate(calc(-50% + 3px),-90px)}100%{transform:translate(-50%,-135vh)}}
+.flame{transform-box:fill-box;transform-origin:50% 0;animation:fl .12s infinite alternate}
+@keyframes fl{to{transform:scaleY(1.35)}}
+.nm{width:100%;padding:15px 16px;border-radius:16px;border:2px solid #fff;background:#ffffffcc;font:inherit;font-size:1.05rem;color:var(--ink)}
+.nm::placeholder{color:#8d6bd6aa}
+#msg a{color:#c23a8a;font-weight:700}
+#mus{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));right:12px;z-index:45;width:44px;height:44px;border-radius:50%;background:#ffffffdd;color:var(--ink);display:none;place-items:center;padding:0;box-shadow:0 3px 0 #d9ccffcc}
+#mus.show{display:grid}
+#mus svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+#mus .x{display:none}
+#mus.off .x{display:block}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}.rocket{display:none}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="star" viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.2 6.8.8-5 4.7 1.3 6.7L12 17.5l-6 3.4 1.3-6.7-5-4.7 6.8-.8z"/></symbol>
+  <symbol id="moon" viewBox="0 0 24 24"><path d="M16 3a9 9 0 1 0 5 15.5A8 8 0 0 1 16 3z"/></symbol>
+  <symbol id="sparkle" viewBox="0 0 24 24"><path d="M12 2c.8 5.5 4.5 9.2 10 10-5.5.8-9.2 4.5-10 10-.8-5.5-4.5-9.2-10-10 5.5-.8 9.2-4.5 10-10z"/></symbol>
+  <symbol id="ast" viewBox="0 0 24 24"><path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9"/></symbol>
+  <symbol id="astro" viewBox="0 0 120 150">
+    <g stroke="#cdb8ff" stroke-width="2.5">
+      <rect x="26" y="56" width="68" height="58" rx="14" fill="#d9ccff"/>
+      <rect x="35" y="60" width="50" height="56" rx="18" fill="#fff"/>
+      <rect x="10" y="66" width="28" height="15" rx="7.5" fill="#fff" transform="rotate(-20 24 73)"/>
+      <rect x="82" y="66" width="28" height="15" rx="7.5" fill="#fff" transform="rotate(20 96 73)"/>
+      <rect x="40" y="108" width="17" height="32" rx="8.5" fill="#fff"/>
+      <rect x="63" y="108" width="17" height="32" rx="8.5" fill="#fff"/>
+    </g>
+    <rect x="40" y="132" width="17" height="9" rx="4.5" fill="#ffb3d3"/>
+    <rect x="63" y="132" width="17" height="9" rx="4.5" fill="#ffb3d3"/>
+    <rect x="46" y="80" width="28" height="15" rx="6" fill="#ffc2dc"/>
+    <circle cx="54" cy="87.5" r="3" fill="#fff"/><circle cx="66" cy="87.5" r="3" fill="#fff0b8"/>
+    <circle cx="60" cy="38" r="31" fill="#fff" stroke="#cdb8ff" stroke-width="2.5"/>
+    <ellipse cx="60" cy="39" rx="22" ry="18" fill="#9b7fe0"/>
+    <ellipse cx="52" cy="33" rx="6" ry="3.5" fill="#ffffffaa" transform="rotate(-25 52 33)"/>
+    <circle cx="60" cy="9" r="4" fill="#ffe38f"/>
+  </symbol>
+</svg>
+<div id="edge" aria-hidden="true"></div>
+<canvas id="fx" aria-hidden="true"></canvas>
+
+<div id="intro">
+  <div class="planet" aria-hidden="true"></div>
+  <div class="sys" aria-hidden="true"><div class="core"></div><div class="orbit"><i></i></div></div>
+  <svg class="astro" viewBox="0 0 120 150" aria-hidden="true"><use href="#astro"/></svg>
+  <h2 class="f">Misión Daniela</h2>
+  <p class="sub">Estás invitado a su primer añito</p>
+  <button class="hatch" id="hatch" aria-label="Abrir la invitación">
+    <div class="in"><svg class="sp i" viewBox="0 0 24 24" style="width:1em;height:1em"><use href="#star"/></svg></div>
+    <div class="door l"><svg class="as i" viewBox="0 0 24 24"><use href="#ast"/></svg></div>
+    <div class="door r"><svg class="as i" viewBox="0 0 24 24"><use href="#ast"/></svg></div>
+  </button>
+  <div class="hint">Toca la escotilla para despegar</div>
+</div>
+
+<main>
+  <section class="hero">
+    <div class="planet" aria-hidden="true"></div>
+    <div class="sys" aria-hidden="true"><div class="core"></div><div class="orbit"><i></i></div></div>
+    <p>Estás invitado a mi primera vuelta al sol</p>
+    <svg class="astro" viewBox="0 0 120 150" aria-hidden="true"><use href="#astro"/></svg>
+    <h1 id="name" aria-label="Daniela"></h1>
+    <div class="surname">Pillihuaman Choque</div>
+    <div class="age">1<small>añito</small></div>
+    <div class="tag"><svg class="sp i" viewBox="0 0 24 24" style="color:#ffd980"><use href="#sparkle"/></svg> Misión: celebrar juntos <svg class="sp i" viewBox="0 0 24 24" style="color:#ffd980"><use href="#sparkle"/></svg></div>
+  </section>
+
+  <section class="sky" id="sky" aria-label="Estrellas para atrapar">
+    <p>Atrapa las estrellas <b id="pops">0</b>/6</p>
+  </section>
+
+  <section class="welcome">
+    <h2>¡Bienvenidos a bordo!</h2>
+    <p>Querida familia y amigos: Daniela cumple su primer añito y queremos celebrar esta primera vuelta al sol junto a ustedes. Será una misión llena de risas, pastel y estrellas, y no sería lo mismo sin su compañía. ¡Los esperamos con mucho cariño!</p>
+    <p class="sig"><svg class="as i" viewBox="0 0 24 24"><use href="#ast"/></svg> Familia Pillihuaman Choque <svg class="as i" viewBox="0 0 24 24"><use href="#ast"/></svg></p>
+  </section>
+
+  <section class="card">
+    <h2>Datos de la misión</h2>
+    <div class="row"><div class="ico" style="background:var(--butter)"><svg class="as" viewBox="0 0 24 24"><use href="#ast"/></svg></div><div><b id="dateTxt"></b><small>Guarda la fecha</small></div></div>
+    <div class="row"><div class="ico" style="background:var(--mint)"><svg class="as" viewBox="0 0 24 24"><use href="#ast"/></svg></div><div><b id="timeTxt"></b><small>Hora de despegue</small></div></div>
+    <div class="row"><div class="ico" style="background:var(--pink)"><svg class="as" viewBox="0 0 24 24"><use href="#ast"/></svg></div><div><b id="placeTxt"></b><small><a id="mapLink" target="_blank" rel="noopener">Ver en el mapa</a></small></div></div>
+  </section>
+
+  <section class="count" aria-label="Cuenta regresiva">
+    <div><strong id="cd">0</strong><span>días</span></div>
+    <div><strong id="ch">0</strong><span>horas</span></div>
+    <div><strong id="cm">0</strong><span>min</span></div>
+    <div><strong id="cs">0</strong><span>seg</span></div>
+  </section>
+
+  <section class="cta">
+    <input class="nm" id="guest" type="text" maxlength="40" placeholder="Escribe tu nombre" aria-label="Tu nombre" autocomplete="name">
+    <button class="btn yes" id="yes">Sí asistiré (confirmar por WhatsApp)</button>
+    <button class="btn no" id="no">No podré ir</button>
+    <button class="btn share" id="share">Compartir la invitación</button>
+  </section>
+  <p id="msg" role="status"></p>
+</main>
+
+<svg class="rocket" id="rocket" viewBox="0 0 60 130" aria-hidden="true">
+  <g class="flame"><path d="M22 88Q30 128 38 88Z" fill="#ffe38f"/><path d="M26 88Q30 112 34 88Z" fill="#ffaed3"/></g>
+  <path d="M16 62L2 90 16 84Z" fill="#ffb3d3"/><path d="M44 62L58 90 44 84Z" fill="#ffb3d3"/>
+  <path d="M30 4C44 20 46 48 44 80H16C14 48 16 20 30 4Z" fill="#fff" stroke="#cdb8ff" stroke-width="2.5"/>
+  <circle cx="30" cy="38" r="9" fill="#9b7fe0" stroke="#d9ccff" stroke-width="3"/>
+  <rect x="20" y="78" width="20" height="8" rx="3" fill="#d9ccff"/>
+</svg>
+<div class="toast" id="toast"></div>
+<button id="mus" aria-label="Silenciar música"><svg viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/><path class="x" d="M3 3l18 18"/></svg></button>
+
+<script>
+// Edita aquí los datos de la fiesta
+const PARTY = {
+  name: "Daniela",
+  date: new Date("2026-11-21T16:30:00"),
+  place: "Salón de recepciones Nañon, Av. 28 de Julio, San Vicente de Cañete"
+};
+const $ = id => document.getElementById(id);
+const colors = ['#ffa6cc','#c3a6ff','#ffd980','#9fd3ff','#9ee6c8'];
+const ico = (t,c,cls='sp') => `<svg class="${cls}" viewBox="0 0 24 24" style="color:${c}"><use href="#${t}"/></svg>`;
+
+$('name').innerHTML = [...PARTY.name].map((c,i)=>`<span style="--i:${i}">${c}</span>`).join('');
+$('dateTxt').textContent = PARTY.date.toLocaleDateString('es',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+$('timeTxt').textContent = PARTY.date.toLocaleTimeString('es',{hour:'numeric',minute:'2-digit'});
+$('placeTxt').textContent = PARTY.place;
+$('mapLink').href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(PARTY.place);
+
+// Adornos suaves: pocos y bien ubicados
+function deco(host,list){
+  list.forEach(([t,x,y,s,c,d])=>{
+    const e = document.createElement('div'); e.className='deco';
+    e.style.cssText = `--x:${x};--y:${y};--s:${s}px;--c:${c};--d:${d}s`;
+    e.innerHTML = ico(t,c); host.appendChild(e);
+  });
+}
+deco($('intro'),[['star','12%','18%',34,'#ffd980',0],['moon','76%','24%',40,'#fff0b8',.8],['sparkle','20%','62%',26,'#ffa6cc',1.4],['star','84%','56%',26,'#c3a6ff',.4],['sparkle','8%','40%',20,'#9fd3ff',2],['moon','60%','84%',34,'#ffd980',1.1],['star','34%','8%',22,'#9ee6c8',1.8]]);
+deco($('edge'),[['star','1.5%','14%',16,'#ffd980',0],['sparkle','94%','30%',16,'#ffa6cc',1],['star','95%','62%',14,'#c3a6ff',.5],['sparkle','1.5%','78%',16,'#9fd3ff',1.5]]);
+
+// Confeti dibujado: estrellas, lunas, destellos y asteriscos
+const SH = {
+  star:new Path2D("M12 2.5l2.9 6.2 6.8.8-5 4.7 1.3 6.7L12 17.5l-6 3.4 1.3-6.7-5-4.7 6.8-.8z"),
+  moon:new Path2D("M16 3a9 9 0 1 0 5 15.5A8 8 0 0 1 16 3z"),
+  sparkle:new Path2D("M12 2c.8 5.5 4.5 9.2 10 10-5.5.8-9.2 4.5-10 10-.8-5.5-4.5-9.2-10-10 5.5-.8 9.2-4.5 10-10z"),
+  as:new Path2D("M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9")
+};
+const names = Object.keys(SH);
+const cv = $('fx'), ctx = cv.getContext('2d');
+let parts = [], raf = 0;
+function resize(){cv.width = innerWidth*devicePixelRatio;cv.height = innerHeight*devicePixelRatio}
+resize(); addEventListener('resize',resize);
+function mk(x,y,vx,vy,life){return {x,y,vx,vy,r:9+Math.random()*10,c:colors[(Math.random()*colors.length)|0],g:names[(Math.random()*names.length)|0],rot:Math.random()*6,vr:(Math.random()-.5)*.25,life}}
+function burst(x,y,n=60,spread=1){
+  for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,s=(3+Math.random()*7)*spread;parts.push(mk(x,y,Math.cos(a)*s,Math.sin(a)*s-4,90+Math.random()*50))}
+  if(!raf) loop();
+}
+function loop(){
+  ctx.clearRect(0,0,cv.width,cv.height);
+  const k = devicePixelRatio;
+  parts = parts.filter(p=>p.life>0);
+  for(const p of parts){
+    p.vy += .18; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.life--;
+    ctx.save(); ctx.translate(p.x*k,p.y*k); ctx.rotate(p.rot);
+    const sc = p.r*k/12; ctx.scale(sc,sc); ctx.translate(-12,-12);
+    ctx.globalAlpha = Math.min(1,p.life/30); ctx.lineJoin = ctx.lineCap = 'round';
+    if(p.g==='as'){ctx.strokeStyle=p.c;ctx.lineWidth=3;ctx.stroke(SH.as)}
+    else{ctx.fillStyle=p.c;ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.fill(SH[p.g]);ctx.stroke(SH[p.g])}
+    ctx.restore();
+  }
+  raf = parts.length ? requestAnimationFrame(loop) : 0;
+  if(!raf) ctx.clearRect(0,0,cv.width,cv.height);
+}
+function rain(){for(let i=0;i<8;i++)setTimeout(()=>burst(Math.random()*innerWidth,innerHeight*.2,30),i*160)}
+function shower(ms){const t=setInterval(()=>{for(let i=0;i<2;i++){const p=mk(Math.random()*innerWidth,-20,(Math.random()-.5)*2,1+Math.random()*2.5,200);p.r=10+Math.random()*10;parts.push(p)}if(!raf)loop()},80);setTimeout(()=>clearInterval(t),ms)}
+function opening(){burst(innerWidth/2,innerHeight/2,130,1.7);for(let i=0;i<8;i++)setTimeout(()=>burst(Math.random()*innerWidth,Math.random()*innerHeight*.6,40,1.2),i*230);shower(3600)}
+
+// Música: "Cumpleaños feliz" alegre, sintetizada en el navegador
+const N={G4:392,A4:440,B4:493.88,C5:523.25,D5:587.33,E5:659.25,F5:698.46,G5:783.99,C6:1046.5,E6:1318.5,G6:1568,C7:2093};
+const MEL=[['G4',.75],['G4',.25],['A4',1],['G4',1],['C5',1],['B4',2],['G4',.75],['G4',.25],['A4',1],['G4',1],['D5',1],['C5',2],['G4',.75],['G4',.25],['G5',1],['E5',1],['C5',1],['B4',1],['A4',1],['F5',.75],['F5',.25],['E5',1],['C5',1],['D5',1],['C5',2]];
+const CH={C:{b:130.81,t:[261.63,329.63,392]},G:{b:98,t:[246.94,293.66,392]},F:{b:87.31,t:[261.63,349.23,440]}};
+const BARS=['C','G','G','C','C','F','F','C'];
+let ac=null,musicOn=false,musicTimer=0,master=null,pass=0;
+function tone(f,t,d,v,ty){const o=ac.createOscillator(),g=ac.createGain();o.type=ty;o.frequency.value=f;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(v,t+.01);g.gain.exponentialRampToValueAtTime(0.0001,t+d);o.connect(g);g.connect(master);o.start(t);o.stop(t+d+.05)}
+function bell(f,t,d){tone(f,t,d*1.8,.17,'sine');tone(f*2,t,d*.9,.05,'triangle');tone(f*3,t,d*.4,.025,'sine')}
+function playLoop(){
+  if(!musicOn) return;
+  const B=.38,t0=ac.currentTime+.08,up=pass%2?2:1;let t=t0;
+  MEL.forEach(([n,b])=>{bell(N[n]*up,t,b*B);t+=b*B});
+  BARS.forEach((c,i)=>{const h=CH[c],s=t0+i*3*B;tone(h.b,s,B*1.6,.22,'triangle');[1,2].forEach(k=>h.t.forEach(f=>tone(f,s+k*B,B*.9,.05,'triangle')))});
+  [N.C6,N.E6,N.G6,N.C7].forEach((f,i)=>bell(f,t+.02+i*.11,.5));
+  pass++;
+  musicTimer=setTimeout(playLoop,(t-t0+1.2)*1000);
+}
+function setMusic(on){
+  musicOn=on;$('mus').classList.toggle('off',!on);
+  $('mus').setAttribute('aria-label',on?'Silenciar música':'Activar música');
+  clearTimeout(musicTimer);
+  if(on){ac.resume();playLoop()}else if(ac){ac.suspend()}
+}
+function startMusic(){
+  try{
+    const AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC) return;
+    if(!ac){ac=new AC();master=ac.createGain();master.gain.value=.7;master.connect(ac.destination)}
+    $('mus').classList.add('show');setMusic(true);
+  }catch(e){}
+}
+$('mus').onclick=()=>{if(ac)setMusic(!musicOn)};
+document.addEventListener('visibilitychange',()=>{if(!ac||!musicOn)return;if(document.hidden){clearTimeout(musicTimer);ac.suspend()}else{ac.resume();playLoop()}});
+
+// Escotilla
+$('hatch').addEventListener('click',function(){
+  if(this.classList.contains('open')) return;
+  this.classList.add('open');startMusic();
+  setTimeout(()=>{$('intro').classList.add('gone');opening()},1100);
+});
+
+// Estrellas y lunas para atrapar
+const sky = $('sky'); let pops = 0;
+[['star','#ffd980'],['moon','#c3a6ff'],['sparkle','#ffa6cc'],['star','#9fd3ff'],['moon','#ffd980'],['sparkle','#9ee6c8']].forEach(([t,c],i)=>{
+  const b = document.createElement('button');
+  b.className = 'st'; b.innerHTML = ico(t,c); b.setAttribute('aria-label','Atrapar');
+  b.style.cssText = `--c:${c};--x:${6+i*16}%;--d:${8+i%3*2}s;--w:-${i*1.6}s`;
+  b.onclick = ()=>{
+    const r = b.getBoundingClientRect();
+    burst(r.left+r.width/2,r.top+r.height/2,22);
+    b.style.visibility='hidden'; b.style.animationPlayState='paused';
+    pops++; $('pops').textContent = pops;
+    if(pops===6){rain();toast('¡Atrapaste todo el cielo!')}
+    setTimeout(()=>{b.style.visibility='visible';b.style.animationPlayState='running'},4000);
+  };
+  sky.appendChild(b);
+});
+
+// Cuenta regresiva
+function tick(){
+  const d = Math.max(0,PARTY.date - Date.now())/1000|0;
+  $('cd').textContent = d/86400|0; $('ch').textContent = d%86400/3600|0;
+  $('cm').textContent = d%3600/60|0; $('cs').textContent = d%60;
+}
+tick(); setInterval(tick,1000);
+
+function launch(){const r=$('rocket');r.classList.remove('go');void r.offsetWidth;r.classList.add('go');}
+function toast(t){const el=$('toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2600)}
+const WA = "51963219099";
+function waLink(texto){
+  const nombre = $('guest').value.trim();
+  const msg = (nombre ? `Hola, soy ${nombre}. ` : 'Hola. ') + texto;
+  return `https://wa.me/${WA}?text=${encodeURIComponent(msg)}`;
+}
+function openWA(u,ms){
+  $('msg').innerHTML = `Abriendo WhatsApp… <a href="${u}">Toca aquí si no se abre</a>`;
+  setTimeout(()=>{location.href = u},ms);
+}
+$('yes').onclick = e=>{
+  burst(e.clientX,e.clientY,80,1.4); rain(); launch();
+  openWA(waLink(`Confirmo mi asistencia al primer añito de ${PARTY.name}. ¡Ahí estaré!`),1500);
+};
+$('no').onclick = ()=>{
+  openWA(waLink(`Lamentablemente no podré asistir al primer añito de ${PARTY.name}. ¡Gracias por la invitación!`),600);
+};
+$('share').onclick = async ()=>{
+  const data = {title:document.title,text:`Estás invitado al primer añito de ${PARTY.name}`,url:location.href};
+  try{ if(navigator.share){await navigator.share(data);return} }catch(e){return}
+  try{ await navigator.clipboard.writeText(location.href); toast('Enlace copiado') }catch(e){ toast('Copia el enlace desde la barra de direcciones') }
+};
+</script>
+</body>
+</html>
